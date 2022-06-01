@@ -1,0 +1,498 @@
+---
+title: "Project 2C"
+output:
+  html_document:
+    df_print: paged
+---
+INTRODUCTION
+
+Scientific Question: Are there differences in the amino acid sequence of defensive proteins that protect Allium cepa (onion) and Allium sativum (garlic) from herbivores that make the smell and flavor of these two vegetables unique despite being part of the same genus and having similar defensive mechanisms?
+
+Background
+- Data is sourced from Uniprot, PDB, NCBI, Swiss Model. The proteins that we are interested are the alliin lyase (alliinase) and lectin in Allium sativum which is garlic and Allium cepa which is onions. The Amino acid sequences of the two proteins are gathered from Uniprot and NCBI. Uniprot data is used in the pairwise sequence alignment while data from NCBI on various other Allium species is used. The PDB and Swiss Model is used for homology modeling of Allium cepa's protein structure for alliinase and lectin since there is no structure for these two in the PDB database.
+
+Scientific Hypothesis: If the difference in flavor and smell profiles of Allium cepa and Allium sativum is caused by differences in the amino acid sequence of the plant’s defensive proteins against herbivores, then there will be observable differences in the amino acid sequence of key defensive proteins such as alliin lyase (alliinase) and lectin. 
+
+Analyses
+- Pairwise sequence alignment is performed between the Allium sativum and Allium cepa data gathered from Uniprot. The amino acid sequences of the two species would be ran against each other and a score would given for running this bioinformatic method.
+- Homology Modeling is performed using known protein structures from Allium sativum as there are protein structures created for Allium sativum's alliinase and lectin so this is used as the template to create the protein structures for Allium cepa's alliinase and lectin.
+- HeatMap is a visual bioinformatic method that is used in this project to visualize and relationship between the two variables.
+- Phylogenetic tree is another visual bioinformatic method that is used where multiple other Allium species sequences are put together and they are grouped into clusters to observe their evolutionary relationship with each other.
+
+All the packages that you need
+
+PAIRWISE SEQUENCE ALIGNMENT
+- Biostrings
+- seqinr
+
+HOMOLOGY MODELING
+- vembedr
+
+HEATMAP
+- gplots
+
+PHYLOGENETIC TREE
+- adegenet
+- ape
+- ggtree
+- DECIPHER
+- viridis
+- ggplot2
+
+Packages for pairwise sequence alignment
+
+```{r}
+# First need to download Biostrings and seqinr 
+# Uncomment the install code lines if you have not already downloaded the packages
+
+# BiocManager::install("Biostrings")
+# This package is necessary to be able to run the functions like pairwiseAlignment(), readAAStringSet, etc for our pairwise sequence alignment code
+# We will also be using a substitutionmatrix called BLOSUM50
+
+library(Biostrings)
+
+# BiocManager::install("seqinr")
+# Necessary to use functions like read.fasta() to read our fasta files
+
+library(seqinr)
+```
+
+Where to download files for pairwise sequence alignment!
+Where I downloaded my data from: https://www.uniprot.org/
+
+Fasta files for Alliin Lyase (Alliinase)
+Allium_Sativum_Alliin_Lyase 1: https://rest.uniprot.org/uniprotkb/Q01594.fasta
+Allium_Sativum_Alliin_Lyase 2: https://rest.uniprot.org/uniprotkb/Q41233.fasta
+Allium_Cepa_Alliin_Lyase: https://rest.uniprot.org/uniprotkb/P31757.fasta
+
+Fasta files for Lectin
+Allium_Sativum_Lectin: https://rest.uniprot.org/uniprotkb/P83886.fasta
+Allium_Cepa_Lectin: https://rest.uniprot.org/uniprotkb/C0HJM8.fasta
+
+Instruction to creating fasta files from uniprot fasta data if save as does not work for you
+1) Copy and paste the sequence into your electronic devices notepad
+2) Name file (name).fasta
+3) Download as all files not text
+
+Pairwise Sequence Alignment with Allium sativum (Garlic) Alliin Lyase 1 and Allium cepa (Onion) Alliin Lyase 
+
+```{r}
+
+A.S.A.L.1_unaligned <- readAAStringSet("Allium_Sativum_Alliin_Lyase 1.fasta")
+# uncomment the lines below to check the class of the variable A.S.A.L.1_unaligned and also observe what it prints
+# class(A.S.A.L.1_unaligned)
+# A.S.A.L.1_unaligned
+
+
+A.C.A.L_unaligned <- readAAStringSet("Allium_Cepa_Alliin_Lyase.fasta")
+# uncomment the lines below to check the class of the variable A.S.A.L.1_unaligned and also observe what it prints
+# class(A.C.A.L_unaligned)
+# A.C.A.L_unaligned
+
+# The substitutionMatrix that we will be using comes from the package Biostrings. We will be using BLOSUM50
+
+data("BLOSUM50")
+# uncomment the line below to observe the BLOSUM50 matrix from the Biostring package
+# BLOSUM50
+
+# gapopening and extension for scoring
+# gapopening means that for every gap in the alignment that is open the score drops by (#) in this case we set it to -2
+# gapExtension is the incremental cost in the alignment through the length of the gap which we set to -8 here
+# We will be using scoreOnly = FALSE which result in creating the optimal alignment and the final score
+
+# uncomment below if you want to find out the documentation of pairwise alignment
+# ?pairwiseAlignment
+
+globalAlignA.S.A.L.1A.C.A.L <- pairwiseAlignment(A.S.A.L.1_unaligned, A.C.A.L_unaligned, substitutionMatrix = "BLOSUM50", gapOpening = -2, gapExtension = -8, scoreOnly = FALSE)
+
+globalAlignA.S.A.L.1A.C.A.L
+
+```
+Pairwise Sequence Alignment is a bioinformatic method that compares the nucleotide or amino acid sequence of the object that we are comparing.
+
+
+Pairwise Sequence Alignment with Allium sativum (Garlic) Alliin Lyase 1 and Allium sativum (Garlic) Alliin Lyase 2
+
+```{r}
+# Similar code as above
+
+A.S.A.L.1_unaligned <- readAAStringSet("Allium_Sativum_Alliin_Lyase 1.fasta")
+# uncomment the lines below to check the class of the variable A.S.A.L.1_unaligned and also observe what it prints
+# class(A.S.A.L.1_unaligned)
+# A.S.A.L.1_unaligned
+
+A.S.A.L.2_unaligned <- readAAStringSet("Allium_Sativum_Alliin_Lyase 2.fasta")
+# uncomment the lines below to check the class of the variable A.S.A.L.1_unaligned and also observe what it prints
+# class(A.C.A.L_unaligned)
+# A.C.A.L_unaligned
+
+data("BLOSUM50")
+# uncomment the line below to observe the BLOSUM50 matrix from the Biostring package
+# BLOSUM50
+
+globalAlignA.S.A.L.1A.S.A.L.2 <- pairwiseAlignment(A.S.A.L.1_unaligned, A.S.A.L.2_unaligned, substitutionMatrix = "BLOSUM50", gapOpening = -2, gapExtension = -8, scoreOnly = FALSE)
+
+globalAlignA.S.A.L.1A.S.A.L.2
+```
+Pairwise Sequence Alignment with Allium sativum (Garlic) Alliin Lyase 2 and Allium cepa (Onion) Alliin Lyase 
+
+```{r}
+# Similar code as above
+
+A.C.A.L_unaligned <- readAAStringSet("Allium_Cepa_Alliin_Lyase.fasta")
+# uncomment the lines below to check the class of the variable A.S.A.L.1_unaligned and also observe what it prints
+# class(A.C.A.L_unaligned)
+# A.C.A.L_unaligned
+
+A.S.A.L.2_unaligned <- readAAStringSet("Allium_Sativum_Alliin_Lyase 2.fasta")
+# uncomment the lines below to check the class of the variable A.S.A.L.1_unaligned and also observe what it prints
+# class(A.C.A.L_unaligned)
+# A.C.A.L_unaligned
+
+data("BLOSUM50")
+# uncomment the line below to observe the BLOSUM50 matrix from the Biostring package
+# BLOSUM50
+
+globalAlignA.S.A.LA.C.A.L.2 <- pairwiseAlignment(A.C.A.L_unaligned, A.S.A.L.2_unaligned, substitutionMatrix = "BLOSUM50", gapOpening = -2, gapExtension = -8, scoreOnly = FALSE)
+
+globalAlignA.S.A.LA.C.A.L.2
+
+
+```
+Pairwise Sequence Alignment with Allium sativum (Garlic) Lectin and Allium cepa (Onion) Lectin
+
+```{r}
+
+# Similar code as above
+
+A.C.L_unaligned <- readAAStringSet("Allium_Cepa_Lectin.fasta")
+# uncomment the lines below to check the class of the variable A.S.A.L.1_unaligned and also observe what it prints
+# class(A.C.A.L_unaligned)
+# A.C.A.L_unaligned
+
+A.S.L_unaligned <- readAAStringSet("Allium_Sativum_Lectin.fasta")
+# uncomment the lines below to check the class of the variable A.S.A.L.1_unaligned and also observe what it prints
+# class(A.C.A.L_unaligned)
+# A.C.A.L_unaligned
+
+data("BLOSUM50")
+# uncomment the line below to observe the BLOSUM50 matrix from the Biostring package
+# BLOSUM50
+
+globalAlignA.S.LA.C.L <- pairwiseAlignment(A.C.L_unaligned, A.S.L_unaligned, substitutionMatrix = "BLOSUM50", gapOpening = -2, gapExtension = -8, scoreOnly = FALSE)
+
+globalAlignA.S.LA.C.L
+```
+
+
+Homology Modeling
+
+Homology Modeling uses preexisting protein structure templates to create a theoretical structure of what a the unknown protein's structure would be like without having to go through things like Crystallography and etc.
+
+Embeded video and images from swiss modeling
+
+MODEL 1: Creating a protein model of Allium cepa's alliin lyase by using 1LK9
+
+Used https://swissmodel.expasy.org/ to create homology model of Allium cepa alliin lyase using pre-existing template 1LK9 from the PDB database/template of 1LK9 is in Swiss databank 
+
+Fasta file used create the Allium cepa alliin lyase is by using uniprot's amino acid sequence on Allium cepa: https://rest.uniprot.org/uniprotkb/P31757.fasta
+
+Below is the protein structure created using the 1LK9 protein structure through Swiss Modeling
+![Model 1 from 1Lk9 template](/Users/yudan/Documents/BIMM 143/Model 1 from 1lk9.png)
+
+Below is the protein structure used to create the model seen above
+![1Lk9.1](/Users/yudan/Documents/BIMM 143/1lk9.1.png)
+You can access data for the ramachandran and quality accessment by clicking on structure accessment after running the homology model
+
+Below is the Ramachandran for model 1 also from Swiss Model
+![Ramachandran of Model 1](/Users/yudan/Documents/BIMM 143/Ramachandran of Model 1.png)
+
+Below is a picture of the quality of model and the data
+![Quality of Model 1](/Users/yudan/Documents/BIMM 143/Quality of Model 1.png)
+
+Below chunck is movie made from pymol and uploaded onto youtube for Model 1
+```{r}
+
+# This package is necessary to embed url from youtube for our swiss model protein
+# Uncomment line below to install the package
+# install.packages("vembedr")
+library(vembedr)
+
+# Link to youtube video
+embed_url("https://www.youtube.com/watch?v=2gSJXkXIJoU&ab_channel=Danny")
+
+
+```
+
+
+Model 2: Creating a protein model of Allium cepa's lectin by using 1KJ1
+
+Used https://swissmodel.expasy.org/ to create homology model of Allium cepa alliin lyase using pre-existing template 1KJ1 from the PDB database/template of 1KJ1 is in Swiss databank 
+
+Fasta file used to create the Allium cepa lectin is by using uniprot's amino acid sequence on Allium cepa: https://rest.uniprot.org/uniprotkb/C0HJM8.fasta
+
+![Model 2 from 1KJ1 template](/Users/yudan/Documents/BIMM 143/Model 2 from 1KJ1.png)
+
+Below is the protein structure used to create the model seen above
+![1KJ1](/Users/yudan/Documents/BIMM 143/1KJ1.png)
+Below is the Ramachandran for model 2 also from Swiss Model
+![Ramachandran of Model 2](/Users/yudan/Documents/BIMM 143/Ramachandran of Model 2.png)
+
+
+Below is a picture of the quality of model and the data
+![Quality of Model 2](/Users/yudan/Documents/BIMM 143/Quality of Model 2.png)
+
+Below chunck is the pymol movie made from pymol and uploaded onto youtube for Model 2
+
+```{r}
+
+library(vembedr)
+
+# Link to youtube video
+embed_url("https://www.youtube.com/watch?v=GCyvUTBsyVc&feature=youtu.be&ab_channel=Danny")
+
+
+```
+
+
+HeatMap
+
+HeatMap is a visual bioinformatic method that illustrates the relationship between two variables and demonstrates an easy to understand trend when looking at the data through its color scheme
+
+```{r}
+
+# Combined fasta file for heatmap
+
+# Combined A.S.A.L.1_unaligned, A.C.A.L_unaligned, A.S.A.L.2_unaligned, A.C.L_unaligned, and A.S.L_unaligned into the variable uniprot
+
+uniprot <- c("A.S.A.L.1_unaligned", "A.C.A.L_unaligned", "A.S.A.L.2_unaligned", "A.C.L_unaligned", "A.S.L_unaligned")
+# Uncomment the line below to see what is the class of the variable
+# class(uniprot)
+
+# Here I read all of the fasta files using read.fasta to set up the data for the heatmap code
+
+A.S.A.L.1_read <- read.fasta(file = "Allium_Sativum_Alliin_Lyase 1.fasta")
+A.C.A.L_read <- read.fasta(file = "Allium_Cepa_Alliin_Lyase.fasta")
+A.S.A.L.2_read <- read.fasta(file = "Allium_Sativum_Alliin_Lyase 2.fasta")
+A.C.L_read <- read.fasta(file = "Allium_Cepa_Lectin.fasta")
+A.S.L_read <- read.fasta(file = "Allium_Sativum_Lectin.fasta")
+
+# Combine all of the read fasta file variables into the variable All_reads
+All_reads <- c("A.S.A.L.1_read", "A.C.A.L_read", "A.S.A.L.2_read", "A.C.L_read", "A.S.L_read")
+# Uncomment the code below to see what class of variable our variable All_reads is
+# class(All_reads)
+
+# Create a vector that is as long as the number of sequences in the FASTA file.
+# x is going to be our vector variable that will be used in the nested for loop that is necessary for the next chunk of code to run our heatmap
+x <- 1:length(All_reads)
+# Print out x to confirm that we have all 5 files here
+x
+
+```
+
+
+```{r}
+# Below is the package that we need to run the heatmap.2() function
+# install.packages("gplots")
+library(gplots)
+
+MatrixforHeatmap <- function(data_sequences, length_sequences) {
+# We will get the matrix ready
+  forheatmap <- matrix(nrow=length(x), ncol=length(x))
+  # The function below creates a nested for loop
+  for (i in length_sequences) {
+    for (j in length_sequences){
+      # define the variables for each sequence from the sequence alignment
+      Line_1 <- data_sequences[i]
+      Line_2 <- data_sequences[j]
+    
+      # Turn the Line_1 variable into a character string
+      data_seql = AAStringSetList(Line_1) #Pull out just the sequences as an AA string. AAStringSetList takes the sequence from QuerySeq and isolates the sequence
+      as.character(unlist(data_seql)) # This function as.character turns the sequence into characters and because we do not want a list in our variable QS_I we will also be removing the list by using the function unlist(). Remove the list component of dsl, coerce dsl from a AA String to character string
+      char_list = as(data_seql, "CharacterList") # Using the function as() and inputting our variable dsl to turn the characters into specific list called a characterlist. Turn dsl into a compressed character list (cL).
+      as.list(char_list) # Convert from compressed character list to a plain list
+      
+       # Now we will repeat the same thing that we did with aboe with Line_2
+      # Turn the Line_2 variable into a character string
+      data_seq2 = AAStringSetList(Line_2)
+      as.character(unlist(data_seq2))
+      char_list2 = as(data_seq2, "CharacterList")
+      as.list(char_list2)
+    
+      # Perform a pairwise sequence alignment for the two strings
+      pa <- pairwiseAlignment(pattern = c(char_list2), subject =  char_list)
+    
+      # Assign the score from the pairwise sequence alignment to the matrix
+      forheatmap[i,j] <- score(pa) # This part of the code is to add in the data that we made from the scores from the pairwise alignment into our variable forheatmap to later input into our heatmap function
+    }
+  }
+  return(forheatmap)
+}
+
+# This is what we will put into our heatmp.2 function
+ForloopMatrix <- MatrixforHeatmap(uniprot, x)
+# Uncomment to print the values in the heatmap
+ForloopMatrix
+
+# Create the heatmap using heatmap.2() function
+heatmap.2(ForloopMatrix)
+```
+
+
+Phylogenetic Tree
+
+A phylogenetic tree is a visual bioinformatic method that groups different/similar species and clusters them based on their differences/similarities in their nucleotide or amino acid sequence to highlight their evolutionary relationship and how closely one species is related to another.
+
+
+```{r}
+# install.packages("adegenet")
+# install.packages("ape")
+# if (!require("BiocManager", quietly = TRUE))
+   #  install.packages("BiocManager")
+# BiocManager::install("ggtree")
+
+# if (!requireNamespace("BiocManager", quietly=TRUE))
+    # install.packages("BiocManager")
+# BiocManager::install("DECIPHER")
+# install.packages("viridis")
+# install.packages("ggplot2")
+
+# adegenet is used to be able to use the function AlignSeqs
+library(adegenet)
+library(ape)
+library(ggtree)
+library(DECIPHER)
+library(viridis)
+library(ggplot2)
+
+
+```
+
+Phylogenetic Tree
+
+Resource: https://www.youtube.com/watch?v=6mOCtFR3N8w&ab_channel=AustralianBioCommons
+
+Data from https://www.ncbi.nlm.nih.gov/
+
+Phylogenetic Tree of Allium family Alliin Lyase protein
+
+Instructions to get data
+- First go to https://www.ncbi.nlm.nih.gov/'
+- Look up Alliin Lyase Allium
+- Go to proteins
+- Download the fasta files for Allium.cepa, Allium.fistulosum, Allium.ascalonicum, Allium.ampeloprasum, Allium.sativum, Allium.chinense, and Allium.tuberosum (All in one file)
+- Copy into notepad and save as a text file (I named mine Alliin Lyase 2.0.txt)
+
+```{r}
+# Using function readAAStringSet from our Biostrings package to read our text file into a variable that we will call ncbi_sequences
+ncbi_sequences_alliin_lyase <- readAAStringSet("Alliin Lyase 2.0.txt")
+
+ncbi_sequences_alliin_lyase
+
+# Below is a code to remove gaps from the 7 different sequences that we will be looking at
+# https://rdrr.io/bioc/DECIPHER/man/RemoveGaps.html
+ncbi_seqs_new <- RemoveGaps(ncbi_sequences_alliin_lyase,
+           removeGaps = "all",
+           processors = 1)
+
+# DECIPHER package is necessary to use the function AlignSeqs
+# This function aligns our sequences 
+aligned <- AlignSeqs(ncbi_seqs_new)
+
+
+# Can use BrowseSeqs function from DECIPHER to look at our sequences in our browser and observe how they are aligned now
+BrowseSeqs(aligned, highlight = 0)
+
+# This makes our fasta file which I call Alliin_aligned.fasta
+writeXStringSet(aligned,
+                file = "Alliin_aligned.fasta")
+
+# This function read.alignment is from seqinr package
+# We name our variable after reading our fasta file using read.alignment to AA for simplicity
+AA <- read.alignment("Alliin_aligned.fasta", format = "fasta")
+
+# Running this function without having the file aligned will crash R
+# This function dist.alignment() is also from seqinr
+Dis_Matrix <- dist.alignment(AA, matrix = "similarity")
+# Uncomment the code below to look at the documentation of dst.alignment function
+# ?dist.alignment
+
+# Turn our Dis_Matrix into a dataframe using the function as.data.frame and as.matrix
+dataframe <- as.data.frame(as.matrix(Dis_Matrix))
+
+# This function is from here
+# Darker values indicate more distant sequences while lighter values indicate sequences that are sequences that are closer and more similar
+table.paint(dataframe, cleg = 0, clabel.row = 1, clabel.col = 1)
+
+# nj function turns our Matrix into a phylo object
+phylo_tree_alliin <- nj(Dis_Matrix)
+# Uncomment code below to run the class of our variable phylo_tree_alliin
+# class(phylo_tree_alliin)
+
+phylo_tree_alliin <- ladderize(phylo_tree_alliin)
+
+# You can plot the phylogenetic tree in base R
+plot(phylo_tree_alliin, main = "Similarities in Alliin Lyase", cex = 0.7)
+
+# You can also make a cluster dendrogram in base R
+h_cluster <- hclust(Dis_Matrix, method = "average", members = NULL)
+plot(h_cluster, cex = 0.6)
+```
+
+Same as code above
+
+Phylogenetic Tree of Allium family Lectin protein
+
+Instructions to get data
+- First go to https://www.ncbi.nlm.nih.gov/'
+- Look up Lectin Allium
+- Go to proteins
+- Download the fasta files for Allium.cepa, Allium.fistulosum, Allium.ascalonicum, Allium.ampeloprasum, Allium.sativum, Allium.chinense, and Allium.tuberosum (All in one file)
+- Copy into notepad and save as a text file (I named mine Alliin Lyase 2.0.txt)
+
+```{r}
+ncbi_sequences_lectin <- readAAStringSet("Lectin.txt")
+
+ncbi_sequences_lectin
+
+# https://rdrr.io/bioc/DECIPHER/man/RemoveGaps.html
+seqs_new <- RemoveGaps(ncbi_sequences_lectin,
+           removeGaps = "all",
+           processors = 1)
+
+aligned <- AlignSeqs(seqs_new)
+
+BrowseSeqs(aligned, highlight = 0)
+
+writeXStringSet(aligned,
+                file = "Lectin_aligned.fasta")
+
+AA <- read.alignment("Lectin_aligned.fasta", format = "fasta")
+
+Matrix <- dist.alignment(AA, matrix = "similarity")
+# ?dist.alignment
+
+dataframe <- as.data.frame(as.matrix(Matrix))
+
+table.paint(dataframe, cleg = 0, clabel.row = 1, clabel.col = 1)
+
+phylo_tree_lectin <- nj(Matrix)
+# class(phylo_tree_lectin )
+
+phylo_tree_lectin  <- ladderize(phylo_tree_lectin )
+
+# Tree plot
+plot(phylo_tree_lectin , main = "Similarities in Lectin", cex = 0.6)
+
+# Dendrogram
+h_cluster <- hclust(Matrix, method = "average", members = NULL)
+plot(h_cluster, cex = 0.6)
+```
+
+
+Analysis
+The pairwise sequence of Allium sativum alliinase 1 vs Allium cepa alliinase yielded a final score of 2890. The pairwise sequence of Allium sativum alliinase 1 vs Allium sativum alliinase 2 yielded a final score of 3065. The pairwise sequence of Allium sativum alliinase 2 vs Allium cepa alliinase yielded a final score of 2765. The pairwise sequence of Allium sativum lectin vs Allium cepa lectin is 827. Data from the pairwise sequence alignment bioinformatic method supports that there are differences in the amino acid sequence defensive proteins that protect Allium cepa (onion) and Allium sativum (garlic). However, more experiments and research is necessary.
+
+The homology modeling...
+
+
