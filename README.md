@@ -1,5 +1,7 @@
 # BIMM-143-Project-2
 
+In this repository you will need to download the html/rmd file and all of the files listed to run the code. Explanation of the code is done below in the Explanation of files section.
+
 **Scientific Question**
 Are there differences in the amino acid sequence of defensive proteins that protect Allium cepa (onion) and Allium sativum (garlic) from herbivores that make the smell and flavor of these two vegetables unique despite being part of the same genus and having similar defensive mechanisms?
 
